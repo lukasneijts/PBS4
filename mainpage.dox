@@ -1,0 +1,36 @@
+/**
+@mainpage Documentation of DEM-PBS (Student Init)
+@tableofcontents
+
+This is the base Discrete Element Method (DEM) code of the class Particle-based Simulations.
+It implements a domain periodic in the x and y directions, with planar walls in z.
+Spherical particles experience gravity and linear soft-sphere contact forces with friction.
+
+@section assign Overview of 2025 Assignment (Granular Column Collapse)
+Tasks (see A4-DEM.pdf):
+- **A. Verification**: Single particle rebound & two-particle collision restitution (see @ref set_parameters where test setups can be added).
+- **B. Slope stability**: Rotate gravity vector to analyze onset of motion (modify in @ref set_parameters and perhaps add a scan loop in main.c).
+- **C. Column initialization**:
+	- Implement cylindrical wall (add in @ref walls.c, register in @ref set_parameters).
+	- Random pack inside cylinder; randomization (zero g) then settling (normal g) (see @ref initialise.c).
+	- Compute radial / axial solids-volume fraction profiles (new analysis helper; placeholders in initialise.c).
+- **D. Collapse**:
+	- Remove cylindrical wall; record transient and final pile metrics (add logic in @ref main.c).
+	- Compute max height, base radius, slope angle, coordination number evolution.
+
+@section files Key Files & Student TODOs
+- walls.c: `cylindrical_wall` implementation.
+- setparameters.c: blocks for restitution tests, gravity rotation, cylinder parameters.
+- initialise.c: sequence for packing (placement, randomization, settling) and profile computation.
+- main.c: removal of wall, metric computation, extra snapshots.
+
+@section flow Simulation Flow (unchanged base)
+1. set_parameters -> alloc_memory -> (optional restart) -> initialise
+2. build_nbrlist & update_colllist
+3. Velocity-Verlet loop: half-step velocities, positions, update lists, forces, second half velocities, output & restart.
+
+@section notes Implementation Notes
+- Wall functions must return riw (vector from particle center to closest wall point) with squared length set, plus local wall velocity.
+- Collision list keeps tangential displacement; update_tangential_displacements must remain consistent when adding/removing walls.
+- Keep added code guarded or clearly separated so instructor can assess contributions.
+*/
