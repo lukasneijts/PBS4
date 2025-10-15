@@ -9,7 +9,7 @@
 void set_parameters(struct Parameters *p_parameters)
 /* Set the parameters of this simulation */
 {
-  p_parameters->num_part = 1;       // number of particles
+  p_parameters->num_part = 10;       // number of particles
   p_parameters->num_dt_steps = 10000;  // number of time steps
   p_parameters->density = 2500;        // mass density
 
