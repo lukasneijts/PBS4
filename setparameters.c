@@ -9,29 +9,29 @@
 void set_parameters(struct Parameters *p_parameters)
 /* Set the parameters of this simulation */
 {
-  p_parameters->num_part = 7500;       // number of particles
+  p_parameters->num_part = 1;       // number of particles
   p_parameters->num_dt_steps = 10000;  // number of time steps
-  p_parameters->density = 8400;        // mass density
+  p_parameters->density = 2500;        // mass density
 
-  double R_min = 0.795e-3;             
-  double R_max = 1.05*R_min; 
+  double R_min = 2.3e-3;             
+  double R_max = R_min; 
   p_parameters->R_min = R_min;         // minimum particle radius
   p_parameters->R_max = R_max;         // maximum particle radius
   double kn = 1000;                    // spring stiffness of normal contact force
-  double e_n_pp = 0.78, e_t_pp = 0.5, muf = 0.3; //restitution and friction coefficients for particle-particle interactions
+  double e_n_pp = 0.96, e_t_pp = 0.33, muf = 0.40; //restitution and friction coefficients for particle-particle interactions
 
   #define NUM_WALLS 2 // 2 walls are implements: bottom and top. Sides are periodic.
   p_parameters->num_walls = NUM_WALLS;           // number of walls in the system  
   p_parameters->wall_function[0] = bottom_wall;  // function used for wall 0                                                                           //velocity at bottom wall
   p_parameters->wall_function[1] = top_wall;     // function used for wall 1 
-  double e_n_pw[NUM_WALLS] = {0.78, 0.78}, e_t_pw[NUM_WALLS] = {0.9, 0.9}, muf_w[NUM_WALLS] = {0.3, 0.3};         //restitution and frictoin coefficients for particle-wall interactions
+  double e_n_pw[NUM_WALLS] = {0.86, 0.86}, e_t_pw[NUM_WALLS] = {0.33, 0.33}, muf_w[NUM_WALLS] = {0.90, 0.15};         //restitution and frictoin coefficients for particle-wall interactions
   
   p_parameters->L = (struct Vec3D){4e1*R_min, 4e1*R_min, 1e2*R_max};                                                  //box size
 
   double g = 9.81;
   p_parameters->g = (struct Vec3D){0.0, 0.0, -g}; // gravitational acceleration                                                //gravitational acceleration vector
   p_parameters->num_dt_printf = 100;          // number of time steps between prints to screen
-  p_parameters->num_dt_traj = 100;           //number of time steps between saves
+  p_parameters->num_dt_traj = 10;           //number of time steps between saves
   strcpy(p_parameters->filename_xyz, "trajectories");  //filename (without extension) for pdb file
   p_parameters->load_restart = 0;                      //if equal 1 restart file is loaded
   strcpy(p_parameters->restart_in_filename, "restart.dat");  //filename for loaded restart file

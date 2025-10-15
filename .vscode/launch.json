@@ -1,0 +1,47 @@
+{
+    "version": "2.0.0",
+    "configurations": [
+        {
+            "name": "gcc.exe - Build and debug md_debug",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${fileDirname}/md_debug.exe",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${fileDirname}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "miDebuggerPath": "C:/msys64/ucrt64/bin/gdb.exe",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "C/C++: build md_debug for debugging"
+        },
+        {
+            "name": "gcc.exe - Build and run md",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${fileDirname}/md.exe",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${fileDirname}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "miDebuggerPath": "C:/msys64/ucrt64/bin/gdb.exe",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "C/C++: build md for production runs"
+        }
+    ]
+}

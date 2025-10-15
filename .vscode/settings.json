@@ -1,0 +1,24 @@
+{
+    "files.exclude": {
+        "**/.classpath": true,
+        "**/.project": true,
+        "**/.settings": true,
+        "**/.factorypath": true
+    },
+    "files.associations": {
+        "analysis.h": "c",
+        "structs.h": "c",
+        "stdlib.h": "c",
+        "nbrlist.h": "c",
+        "constants.h": "c",
+        "force_test": "cpp",
+        "stdbool.h": "c"
+    },
+    "terminal.integrated.profiles.windows": {
+        "MSYS2 Bash": {
+            "path": "C:\\msys64\\usr\\bin\\bash.exe",
+            "args": ["--login", "-i"],
+            "icon": "terminal-bash"
+    }
+}
+}

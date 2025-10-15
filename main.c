@@ -75,6 +75,7 @@
 #include "dynamics.h"
 #include "memory.h"
 #include "fileoutput.h"
+#include "walls.h"
 
 /**
  * @brief main The main of the DEM code. After initialization, 
