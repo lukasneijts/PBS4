@@ -74,7 +74,7 @@ void set_parameters(struct Parameters *p_parameters)
     
   // Parameters for cylindrical wall
   p_parameters->H_R_ratio = 0.8;                        // height to radius ratio of cylindrical wall
-  p_parameters->R_cyl = 28.0e-3;                        // radius of cylindrical wall
+  p_parameters->R_cyl = 0.5 * p_parameters->L.x;        // radius of cylindrical wall
   p_parameters->L.x = 2.0 * p_parameters->R_cyl;         // box length in x direction
   p_parameters->L.y = 2.0 * p_parameters->R_cyl;         // box length in y direction
   p_parameters->L.z = p_parameters->H_R_ratio * p_parameters->R_cyl;     // height of cylindrical wall

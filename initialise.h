@@ -29,6 +29,15 @@ void initialise_particles(struct Parameters *p_parameters, struct Vectors *p_vec
 void initialise_positions(struct Parameters *p_parameters, struct Vectors *p_vectors);
 
 /**
+ * @brief Initialises positions inside a cylinder
+ * 
+ * @param p_parameters used members: L, R_cyl
+ * @param p_vectors used members: r, radius
+ * @see initialize
+ */
+void initialise_positions_cylinder(struct Parameters *p_parameters, struct Vectors *p_vectors);
+
+/**
  * @brief Initialises velocities according to a Gaussian distribution
  * 
  * @param p_parameters used members: kT, mass

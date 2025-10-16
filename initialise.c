@@ -32,7 +32,7 @@ void initialise(struct Parameters *p_parameters, struct Vectors *p_vectors)
     srand(SEED); // Positive integer as seed for random number generator
     p_vectors->time = 0.0; // Initialize the time to zero
     initialise_particles(p_parameters, p_vectors);
-    initialise_positions(p_parameters, p_vectors);
+    initialise_positions_cylinder(p_parameters, p_vectors);
     initialise_velocities(p_parameters, p_vectors);
     return;
 }
@@ -73,6 +73,56 @@ void initialise_positions(struct Parameters *p_parameters, struct Vectors *p_vec
                 //      p_vectors->r[ipart].z = p_parameters->L.z*generate_uniform_random();
             }
 }
+
+// This function initializes particle positions within a cylindrical container.
+void initialise_positions_cylinder(struct Parameters *p_parameters, struct Vectors *p_vectors)
+{
+    struct Vec3D dr;
+    struct Index3D n;
+    double dl;
+    size_t ipart = 0;
+    size_t num_part = p_parameters->num_part;
+    double *R = p_vectors->radius;
+    double R_max = 0;
+    for (size_t i = 0; i < num_part; ++i)
+        R_max = (R[i] > R_max ? R[i] : R_max);
+
+    dl = 2.1 * R_max;
+    n.i = (int)floor(p_parameters->L.x / dl);
+    n.j = (int)floor(p_parameters->L.y / dl);
+    n.k = (int)(p_parameters->num_part / (n.i * n.j) + 1);
+    dr.x = p_parameters->L.x / (double)n.i;
+    dr.y = p_parameters->L.y / (double)n.j;
+    dr.z = dl;
+
+    double cx = 0.5 * p_parameters->L.x;
+    double cy = 0.5 * p_parameters->L.y;
+    double R_cyl = p_parameters->R_cyl;
+
+    for (size_t i = 0; i < n.i; ++i)
+        for (size_t j = 0; j < n.j; ++j)
+            for (size_t k = 0; k < n.k; ++k)
+            {
+                if (ipart >= num_part)
+                    break;
+                double x = (i + 0.5) * dr.x;
+                double y = (j + 0.5) * dr.y;
+                double z = (k + 0.5) * dr.z;
+
+                // Check if (x, y) is inside the cylinder
+                double dx = x - cx;
+                double dy = y - cy;
+                double dist_xy = sqrt(dx * dx + dy * dy);
+
+                if (dist_xy + R[ipart] <= R_cyl && z <= p_parameters->L.z) {
+                    p_vectors->r[ipart].x = x;
+                    p_vectors->r[ipart].y = y;
+                    p_vectors->r[ipart].z = z;
+                    ipart++;
+                }
+            }
+}
+
 
 void initialise_velocities(struct Parameters *p_parameters, struct Vectors *p_vectors)
 {
