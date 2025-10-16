@@ -9,7 +9,7 @@
 void set_parameters(struct Parameters *p_parameters)
 /* Set the parameters of this simulation */
 {
-  p_parameters->num_part = 100;       // number of particles
+  p_parameters->num_part = 2000;       // number of particles
   p_parameters->num_dt_steps = 10000;  // number of time steps
   p_parameters->density = 2500;        // mass density
 
@@ -73,10 +73,10 @@ void set_parameters(struct Parameters *p_parameters)
 
     
   // Parameters for cylindrical wall
-  p_parameters->H_R_ratio = 0.8;                        // height to radius ratio of cylindrical wall
+  // p_parameters->H_R_ratio = 0.8;                        // height to radius ratio of cylindrical wall
   p_parameters->R_cyl = 0.5 * p_parameters->L.x;        // radius of cylindrical wall
-  p_parameters->L.x = 2.0 * p_parameters->R_cyl;         // box length in x direction
-  p_parameters->L.y = 2.0 * p_parameters->R_cyl;         // box length in y direction
-  p_parameters->L.z = p_parameters->H_R_ratio * p_parameters->R_cyl;     // height of cylindrical wall
+  // p_parameters->L.x = 2.0 * p_parameters->R_cyl;         // box length in x direction
+  // p_parameters->L.y = 2.0 * p_parameters->R_cyl;         // box length in y direction
+  // p_parameters->L.z = p_parameters->H_R_ratio * p_parameters->R_cyl;     // height of cylindrical wall
 
 }
