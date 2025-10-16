@@ -71,6 +71,10 @@ struct Parameters
     size_t num_dt_restart;           //!< Number of time steps between saves of restart file
     char restart_in_filename[1024];  //!< filename for loaded restart file
     char restart_out_filename[1024]; //!< filename for saved restart file
+
+    double H_R_ratio;                //!< height to radius ratio of cylindrical wall
+    double R_cyl;                    //!< radius of cylindrical wall
+    
 };
 
 /**

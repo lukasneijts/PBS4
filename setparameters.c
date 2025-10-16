@@ -20,11 +20,14 @@ void set_parameters(struct Parameters *p_parameters)
   double kn = 1000;                    // spring stiffness of normal contact force
   double e_n_pp = 0.96, e_t_pp = 0.33, muf = 0.40; //restitution and friction coefficients for particle-particle interactions
 
-  #define NUM_WALLS 2 // 2 walls are implements: bottom and top. Sides are periodic.
+  #define NUM_WALLS 3 // 2 walls are implements: bottom and top. Sides are periodic.
   p_parameters->num_walls = NUM_WALLS;           // number of walls in the system  
   p_parameters->wall_function[0] = bottom_wall;  // function used for wall 0                                                                           //velocity at bottom wall
   p_parameters->wall_function[1] = top_wall;     // function used for wall 1 
-  double e_n_pw[NUM_WALLS] = {0.86, 0.86}, e_t_pw[NUM_WALLS] = {0.33, 0.33}, muf_w[NUM_WALLS] = {0.90, 0.15};         //restitution and frictoin coefficients for particle-wall interactions
+  p_parameters->wall_function[2] = cylindrical_wall;     // function used for wall 1 
+  double e_n_pw[NUM_WALLS] = {0.96, 0.86, 0.86};  // normal restitution coefficients 
+  double e_t_pw[NUM_WALLS] = {0.33, 0.33, 0.33};  // tangential restitution coefficients
+  double muf_w[NUM_WALLS] = {0.40, 0.90, 0.15};   // friction coefficients 
   
   p_parameters->L = (struct Vec3D){4e1*R_min, 4e1*R_min, 1e2*R_max};                                                  //box size
 
@@ -67,4 +70,10 @@ void set_parameters(struct Parameters *p_parameters)
     fprintf(stderr, "Warning! r_cut > Ly/2");
   if (p_parameters->r_cut > p_parameters->L.z / 2.0)
     fprintf(stderr, "Warning! r_cut > Lz/2");
+
+  // Parameters for cylindrical wall
+  p_parameters->H_R_ratio = 5.4;                        // height to radius ratio of cylindrical wall
+  p_parameters->R_cyl = 28.0e-3;                        // radius of cylindrical wall
+  p_parameters->L.z = p_parameters->H_R_ratio * p_parameters->R_cyl;     // height of cylindrical wall
+
 }
