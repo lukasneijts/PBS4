@@ -1,6 +1,8 @@
 #ifndef FILEOUTPUT_H_
 #define FILEOUTPUT_H_
 
+void compute_profiles(struct Parameters *p_parameters, struct Vectors *p_vectors);
+void compute_profiles_center_based(struct Parameters *p_parameters, struct Vectors *p_vectors);
 /**
  * @brief Output particle positions to xyz file
  * @param reset 1: write new file or overwrite existing file, 0: append data

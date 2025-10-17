@@ -15,6 +15,10 @@ void alloc_vectors(struct Vectors *p_vectors, size_t num_part)
     p_vectors->omega = (struct Vec3D *)malloc(num_part * sizeof(struct Vec3D));
     p_vectors->f = (struct Vec3D *)malloc(num_part * sizeof(struct Vec3D));
     p_vectors->T = (struct Vec3D *)malloc(num_part * sizeof(struct Vec3D));
+
+    // initialise histogram arrays
+    p_vectors->hist_vol_r = calloc(p_vectors->hist_num_bins_r, sizeof(double));
+    p_vectors->hist_vol_z = calloc(p_vectors->hist_num_bins_z, sizeof(double));
 }
 
 void free_vectors(struct Vectors *p_vectors)
@@ -38,6 +42,10 @@ void free_vectors(struct Vectors *p_vectors)
     p_vectors->f = NULL;
     free(p_vectors->T);
     p_vectors->T = NULL;
+    free(p_vectors->hist_vol_r);
+    p_vectors->hist_vol_r = NULL;  
+    free(p_vectors->hist_vol_z);
+    p_vectors->hist_vol_z = NULL;
 }
 
 void alloc_memory(struct Parameters *p_parameters, struct Vectors *p_vectors, struct Nbrlist *p_nbrlist, struct Colllist *p_colllist)

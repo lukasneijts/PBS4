@@ -93,6 +93,11 @@ struct Vectors
     struct Vec3D *omega; //!< angular-velocity */
     struct Vec3D *f;     //!< forces
     struct Vec3D *T;     //!< torques
+    double *hist_vol_r;    // accumulated particle volume per radial bin
+    double *hist_vol_z;    // accumulated particle volume per axial bin
+    size_t hist_num_bins_r;
+    size_t hist_num_bins_z;
+    size_t hist_samples;   // number of samples accumulated
 };
 
 /**
@@ -156,6 +161,21 @@ struct Colllist
     struct DeltaR *tiw;            //!< tangential displacement vector for wall collision
     struct DeltaR *tiw_tmp;        //!<  array with tangential displacements for internal use
     struct Vec3D *vw;              //!< local velocity of wall at collision point
+};
+
+/**
+ * @brief Struct to store data for a histogram
+ * 
+ */
+struct Histogram
+{
+    size_t nbins;               //!< Number of bins
+    double min, max;            //!< Range in speed units
+    double bin_width;           //!< Width of the bins
+    size_t *counts;             //!< Counts per bin
+    double *bin_centers;        //!< Center bins
+    double total_counts;        //!< Total samples added
+    double delta;               //!< Change in velocity
 };
 
 #endif /* TYPES_MD_H_ */

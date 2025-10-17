@@ -128,6 +128,9 @@ int main(void)
         if (step%parameters.num_dt_traj ==0) record_trajectories_xyz(0,&parameters,&vectors);
         if (step%parameters.num_dt_restart == 0) save_restart(&parameters,&vectors); 
     }
+
+    compute_profiles(&parameters, &vectors);
+    compute_profiles_center_based(&parameters, &vectors);
     save_restart(&parameters,&vectors);
     free_memory(&vectors, &nbrlist, &colllist);
 
