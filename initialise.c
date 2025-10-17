@@ -77,9 +77,6 @@ void initialise_positions(struct Parameters *p_parameters, struct Vectors *p_vec
 // This function initializes particle positions within a cylindrical container.
 void initialise_positions_cylinder(struct Parameters *p_parameters, struct Vectors *p_vectors)
 {
-    struct Vec3D dr;
-    struct Index3D n;
-    double dl;
     size_t ipart = 0;
     size_t num_part = p_parameters->num_part;
     double *R = p_vectors->radius;
@@ -87,40 +84,39 @@ void initialise_positions_cylinder(struct Parameters *p_parameters, struct Vecto
     for (size_t i = 0; i < num_part; ++i)
         R_max = (R[i] > R_max ? R[i] : R_max);
 
-    dl = 2.1 * R_max;
-    n.i = (int)floor(p_parameters->L.x / dl);
-    n.j = (int)floor(p_parameters->L.y / dl);
-    n.k = (int)(p_parameters->num_part / (n.i * n.j) + 1);
-    dr.x = p_parameters->L.x / (double)n.i;
-    dr.y = p_parameters->L.y / (double)n.j;
-    dr.z = dl;
-
     double cx = 0.5 * p_parameters->L.x;
     double cy = 0.5 * p_parameters->L.y;
     double R_cyl = p_parameters->R_cyl;
+    double dz = 2.1 * R_max;
+    double dy = 2.1 * R_max;
+    double dx = dy * sqrt(3.0) / 2.0; // hexagonal lattice spacing
 
-    for (size_t i = 0; i < n.i; ++i)
-        for (size_t j = 0; j < n.j; ++j)
-            for (size_t k = 0; k < n.k; ++k)
-            {
-                if (ipart >= num_part)
-                    break;
-                double x = (i + 0.5) * dr.x;
-                double y = (j + 0.5) * dr.y;
-                double z = (k + 0.5) * dr.z;
+    size_t nz = (size_t)(p_parameters->L.z / dz);
+    size_t ny = (size_t)(2.0 * R_cyl / dy);
+    size_t nx = (size_t)(2.0 * R_cyl / dx);
 
-                // Check if (x, y) is inside the cylinder
-                double dx = x - cx;
-                double dy = y - cy;
-                double dist_xy = sqrt(dx * dx + dy * dy);
+    for (size_t k = 0; k < nz; ++k) {
+        double z = (k + 0.5) * dz;
+        for (size_t j = 0; j < ny; ++j) {
+            double y = cy - R_cyl + (j + 0.5) * dy;
+            for (size_t i = 0; i < nx; ++i) {
+                // Offset every other row for hexagonal packing
+                double x = cx - R_cyl + (i + 0.5) * dx + ((j % 2) ? dx / 2.0 : 0.0);
 
-                if (dist_xy + R[ipart] <= R_cyl && z <= p_parameters->L.z) {
+                double dx_c = x - cx;
+                double dy_c = y - cy;
+                double dist_xy = sqrt(dx_c * dx_c + dy_c * dy_c);
+
+                if (dist_xy + R_max <= R_cyl && z <= p_parameters->L.z) {
+                    if (ipart >= num_part) break;
                     p_vectors->r[ipart].x = x;
                     p_vectors->r[ipart].y = y;
                     p_vectors->r[ipart].z = z;
                     ipart++;
                 }
             }
+        }
+    }
 }
 
 
