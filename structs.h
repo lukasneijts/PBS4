@@ -72,8 +72,16 @@ struct Parameters
     char restart_in_filename[1024];  //!< filename for loaded restart file
     char restart_out_filename[1024]; //!< filename for saved restart file
 
+    // Parameters for cylindrical wall
     double H_R_ratio;                //!< height to radius ratio of cylindrical wall
     double R_cyl;                    //!< radius of cylindrical wall
+
+    // Parameters for collapse / wall removal
+    size_t collapse_start_step;      //!< time step at which the cylindrical wall is removed
+    size_t cyl_wall_index;           //!< index of the cylindrical wall in the wall arrays
+    size_t settle_pers_steps;        //!< number of consecutive steps below kinetic energy tolerance before wall removal
+    double Ekin_tol;                //!< kinetic energy per particle tolerance for settling
+
     
 };
 

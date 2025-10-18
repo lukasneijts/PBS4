@@ -76,6 +76,7 @@
 #include "memory.h"
 #include "fileoutput.h"
 #include "walls.h"
+#include <stdbool.h>
 
 /**
  * @brief main The main of the DEM code. After initialization, 
@@ -109,6 +110,13 @@ int main(void)
     /* initialize profile accumulators (sample frequency uses parameters.num_dt_traj below) */
     profile_accumulators_init(&parameters);
 
+    /* --- automatic settling detector / collapse handling --- */
+    bool cyl_removed = false;
+    int settle_counter = 0;
+    bool use_manual_removal = (parameters.collapse_start_step >= 0);
+    int cyl_index = parameters.cyl_wall_index;
+    /* ----------------------------------------------------- */
+
     while (step < parameters.num_dt_steps) //start of the velocity-Verlet loop
     {
 
@@ -124,6 +132,36 @@ int main(void)
         update_colllist(&parameters, &vectors, &nbrlist, &colllist);
         Epot = calculate_forces(&parameters, &colllist, &vectors);
         Ekin = update_velocities_half_dt(&parameters, &nbrlist, &vectors);
+
+        /* --- detect settling and remove cylindrical wall when settled --- */
+        if (!cyl_removed) {
+            if (use_manual_removal) {
+                if ((int)step == parameters.collapse_start_step) {
+                    if (cyl_index >= 0 && cyl_index < parameters.num_walls) {
+                        if (parameters.num_walls > cyl_index) parameters.num_walls = cyl_index;
+                        update_colllist(&parameters, &vectors, &nbrlist, &colllist);
+                        cyl_removed = true;
+                        printf("Cylindrical wall manually removed at step %lu\n", (long unsigned)step);
+                    }
+                }
+            } else {
+                double Ekin_per_particle = Ekin / (double) parameters.num_part;
+                if (Ekin_per_particle < parameters.Ekin_tol) {
+                    settle_counter++;
+                } else {
+                    settle_counter = 0;
+                }
+                if (settle_counter >= parameters.settle_pers_steps) {
+                    if (cyl_index >= 0 && cyl_index < parameters.num_walls) {
+                        if (parameters.num_walls > cyl_index) parameters.num_walls = cyl_index;
+                        update_colllist(&parameters, &vectors, &nbrlist, &colllist);
+                        cyl_removed = true;
+                        printf("Cylindrical wall removed automatically at step %lu (Ekin/part=%g)\n", (long unsigned)step, Ekin_per_particle);
+                    }
+                }
+            }
+        }
+        /* --------------------------------------------------------------- */
 
        if (step%parameters.num_dt_printf ==0) printf("Step %lu, Time %g, Z %g, Epot %g, Ekin %g, Etot %g\n", (long unsigned) step, vectors.time,
                2.0*((double) colllist.num_nbrs)/((double) parameters.num_part),

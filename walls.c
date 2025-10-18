@@ -92,3 +92,33 @@ bool top_wall(struct Parameters *p_parameters, double radius, struct Vec3D *r, s
         return false;
     }
 }
+
+bool check_remove_cylindrical_wall(struct Parameters *p_parameters, double Ekin, size_t step,
+                                   struct Vectors *vectors, struct Nbrlist *nbrlist,
+                                   struct Colllist *colllist)
+{
+    size_t settle_counter;
+    size_t cyl_index = p_parameters->cyl_wall_index;
+    bool cyl_removed = false;
+    int n_part = p_parameters->num_part;
+    int settle_pers_steps = p_parameters->settle_pers_steps;
+    int num_walls = p_parameters->num_walls;
+    double Ekin_tol = p_parameters->Ekin_tol;
+
+
+    double Ekin_per_particle = Ekin / n_part;
+        if (Ekin_per_particle < Ekin_tol) {
+            settle_counter++;
+        } else {
+            settle_counter = 0;
+        }
+        if (settle_counter >= settle_pers_steps) {
+            if (cyl_index >= 0 && cyl_index < num_walls) {
+                if (num_walls > cyl_index) num_walls = cyl_index;
+                update_colllist(p_parameters, vectors, nbrlist, colllist);
+                cyl_removed = true;
+                printf("Cylindrical wall removed automatically at step %lu (Ekin/part=%g)\n", (long unsigned)step, Ekin_per_particle);
+            }
+        }
+    return cyl_removed;
+}

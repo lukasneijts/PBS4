@@ -43,4 +43,9 @@ bool bottom_wall(struct Parameters *p_parameters, double radius, struct Vec3D *r
  */
 bool top_wall(struct Parameters *p_parameters, double radius, struct Vec3D *r, struct DeltaR *riw, struct Vec3D *vw);
 
+
+bool check_remove_cylindrical_wall(struct Parameters *p_parameters, double Ekin, size_t step,
+                                   struct Vectors *vectors, struct Nbrlist *nbrlist,
+                                   struct Colllist *colllist);
+
 #endif  /* WALLS_H_ */

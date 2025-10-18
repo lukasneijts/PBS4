@@ -10,7 +10,7 @@ void set_parameters(struct Parameters *p_parameters)
 /* Set the parameters of this simulation */
 {
   p_parameters->num_part = 7400;       // number of particles
-  p_parameters->num_dt_steps = 10000;  // number of time steps
+  p_parameters->num_dt_steps = 30000;  // number of time steps
   p_parameters->density = 2500;        // mass density
 
   double R_min = 2.3e-3;             
@@ -34,7 +34,7 @@ void set_parameters(struct Parameters *p_parameters)
   double g = 9.81;
   p_parameters->g = (struct Vec3D){0.0, 0.0, -g}; // gravitational acceleration                                                //gravitational acceleration vector
   p_parameters->num_dt_printf = 100;          // number of time steps between prints to screen
-  p_parameters->num_dt_traj = 10;           //number of time steps between saves
+  p_parameters->num_dt_traj = 50;           //number of time steps between saves
   strcpy(p_parameters->filename_xyz, "trajectories");  //filename (without extension) for pdb file
   p_parameters->load_restart = 0;                      //if equal 1 restart file is loaded
   strcpy(p_parameters->restart_in_filename, "restart.dat");  //filename for loaded restart file
@@ -75,8 +75,14 @@ void set_parameters(struct Parameters *p_parameters)
   // Parameters for cylindrical wall
   p_parameters->H_R_ratio = 0.8;                        // height to radius ratio of cylindrical wall
   p_parameters->R_cyl = 70.5e-3;                        // radius of cylindrical wall
-  p_parameters->L.x = 2.0 * p_parameters->R_cyl;         // box length in x direction
-  p_parameters->L.y = 2.0 * p_parameters->R_cyl;         // box length in y direction
-  p_parameters->L.z = p_parameters->H_R_ratio * p_parameters->R_cyl * 2.0;     // height of cylindrical wall
+  p_parameters->L.x = 10.0 * p_parameters->R_cyl;         // box length in x direction
+  p_parameters->L.y = 10.0 * p_parameters->R_cyl;         // box length in y direction
+  p_parameters->L.z = p_parameters->H_R_ratio * p_parameters->R_cyl * 10.0;     // height of cylindrical wall
+
+  // Collapse / wall removal defaults
+  p_parameters->collapse_start_step = 10000;   // change as needed (when to remove cylinder)
+  p_parameters->cyl_wall_index = 2;           // index used above for cylindrical_wall
+  p_parameters->settle_pers_steps = 10;      // number of consecutive steps below kinetic energy tolerance before wall removal
+  p_parameters->Ekin_tol = 1;             // kinetic energy per particle tolerance for settling
 
 }
