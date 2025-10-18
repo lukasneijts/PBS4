@@ -106,6 +106,9 @@ int main(void)
     Epot = calculate_forces(&parameters, &colllist, &vectors);
     record_trajectories_xyz(1, &parameters, &vectors);
 
+    /* initialize profile accumulators (sample frequency uses parameters.num_dt_traj below) */
+    profile_accumulators_init(&parameters);
+
     while (step < parameters.num_dt_steps) //start of the velocity-Verlet loop
     {
 
@@ -125,9 +128,16 @@ int main(void)
        if (step%parameters.num_dt_printf ==0) printf("Step %lu, Time %g, Z %g, Epot %g, Ekin %g, Etot %g\n", (long unsigned) step, vectors.time,
                2.0*((double) colllist.num_nbrs)/((double) parameters.num_part),
                Epot, Ekin, Epot+Ekin); //Z is the coordination number
-        if (step%parameters.num_dt_traj ==0) record_trajectories_xyz(0,&parameters,&vectors);
+        if (step%parameters.num_dt_traj ==0) {
+            record_trajectories_xyz(0,&parameters,&vectors);
+            /* also sample profiles at the same frequency (averaging) */
+            profile_accumulators_add_sample(&parameters, &vectors);
+        }
         if (step%parameters.num_dt_restart == 0) save_restart(&parameters,&vectors); 
     }
+
+    /* write averaged profiles computed over all samples */
+    profile_accumulators_write_average(&parameters);
 
     compute_profiles(&parameters, &vectors);
     compute_profiles_center_based(&parameters, &vectors);

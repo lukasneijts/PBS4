@@ -5,6 +5,144 @@
 #include "memory.h"
 #include "structs.h"
 
+/* --- profile accumulator state (internal to this file) --- */
+static size_t acc_num_bins_r = 50;
+static size_t acc_num_bins_z = 50;
+static double *acc_phi_r_sum = NULL;
+static double *acc_phi_z_sum = NULL;
+static double *acc_vol_bin_r_tot = NULL;
+static double *acc_vol_bin_z_tot = NULL;
+static size_t acc_sample_count = 0;
+
+/* Initialize accumulators (call once before time loop) */
+void profile_accumulators_init(struct Parameters *p_parameters)
+{
+    double R_cyl = p_parameters->R_cyl;
+    double H = p_parameters->L.z;
+    double dr = R_cyl / (double)acc_num_bins_r;
+    double dz = H / (double)acc_num_bins_z;
+
+    acc_phi_r_sum = calloc(acc_num_bins_r, sizeof(double));
+    acc_phi_z_sum = calloc(acc_num_bins_z, sizeof(double));
+    acc_vol_bin_r_tot = calloc(acc_num_bins_r, sizeof(double));
+    acc_vol_bin_z_tot = calloc(acc_num_bins_z, sizeof(double));
+    acc_sample_count = 0;
+
+    if (!acc_phi_r_sum || !acc_phi_z_sum || !acc_vol_bin_r_tot || !acc_vol_bin_z_tot) {
+        fprintf(stderr, "Error: failed to allocate profile accumulators\n");
+        free(acc_phi_r_sum); free(acc_phi_z_sum); free(acc_vol_bin_r_tot); free(acc_vol_bin_z_tot);
+        acc_phi_r_sum = acc_phi_z_sum = acc_vol_bin_r_tot = acc_vol_bin_z_tot = NULL;
+        return;
+    }
+
+    for (size_t ir = 0; ir < acc_num_bins_r; ++ir) {
+        double r1 = ir * dr;
+        double r2 = (ir + 1) * dr;
+        acc_vol_bin_r_tot[ir] = PI * (r2*r2 - r1*r1) * H;
+    }
+    for (size_t iz = 0; iz < acc_num_bins_z; ++iz) {
+        double z1 = iz * dz;
+        double z2 = (iz + 1) * dz;
+        acc_vol_bin_z_tot[iz] = PI * R_cyl * R_cyl * (z2 - z1);
+    }
+}
+
+/* Add one sample (call periodically during simulation) */
+void profile_accumulators_add_sample(struct Parameters *p_parameters, struct Vectors *p_vectors)
+{
+    if (!acc_phi_r_sum || !acc_phi_z_sum || !acc_vol_bin_r_tot || !acc_vol_bin_z_tot) return;
+
+    size_t num_part = p_parameters->num_part;
+    double R_cyl = p_parameters->R_cyl;
+    double H = p_parameters->L.z;
+    double dr = R_cyl / (double)acc_num_bins_r;
+    double dz = H / (double)acc_num_bins_z;
+
+    double *vol_bin_r = calloc(acc_num_bins_r, sizeof(double));
+    double *vol_bin_z = calloc(acc_num_bins_z, sizeof(double));
+    if (!vol_bin_r || !vol_bin_z) { free(vol_bin_r); free(vol_bin_z); return; }
+
+    for (size_t i = 0; i < num_part; ++i) {
+        double x = p_vectors->r[i].x;
+        double y = p_vectors->r[i].y;
+        double z = p_vectors->r[i].z;
+        double r_part = sqrt((x - 0.5 * p_parameters->L.x) * (x - 0.5 * p_parameters->L.x) +
+                             (y - 0.5 * p_parameters->L.y) * (y - 0.5 * p_parameters->L.y));
+        double R = p_vectors->radius[i];
+        double vol = (4.0/3.0) * PI * R * R * R;
+
+        int ir = (int)(r_part / dr);
+        if (ir >= 0 && ir < (int)acc_num_bins_r)
+            vol_bin_r[ir] += vol;
+
+        int iz = (int)(z / dz);
+        if (iz >= 0 && iz < (int)acc_num_bins_z)
+            vol_bin_z[iz] += vol;
+    }
+
+    /* accumulate per-bin volume fraction */
+    for (size_t ir = 0; ir < acc_num_bins_r; ++ir) {
+        if (acc_vol_bin_r_tot[ir] > 0.0) {
+            double phi = vol_bin_r[ir] / acc_vol_bin_r_tot[ir];
+            acc_phi_r_sum[ir] += phi;
+        }
+    }
+    for (size_t iz = 0; iz < acc_num_bins_z; ++iz) {
+        if (acc_vol_bin_z_tot[iz] > 0.0) {
+            double phi = vol_bin_z[iz] / acc_vol_bin_z_tot[iz];
+            acc_phi_z_sum[iz] += phi;
+        }
+    }
+
+    acc_sample_count++;
+
+    free(vol_bin_r);
+    free(vol_bin_z);
+}
+
+/* Write averaged profiles (call once after simulation ends) */
+void profile_accumulators_write_average(struct Parameters *p_parameters)
+{
+    if (acc_sample_count == 0) {
+        fprintf(stderr, "No profile samples to write (acc_sample_count == 0)\n");
+        return;
+    }
+    /* radial */
+    FILE *fr = fopen("data/dens_radial_avg.csv", "w");
+    if (fr) {
+        fprintf(fr, "radius,volume_fraction_avg\n");
+        for (size_t ir = 0; ir < acc_num_bins_r; ++ir) {
+            double r_center = ((ir + 0.5) * (p_parameters->R_cyl / (double)acc_num_bins_r))/p_parameters->R_cyl;
+            double phi_avg = acc_phi_r_sum[ir] / (double)acc_sample_count;
+            fprintf(fr, "%g,%g\n", r_center, phi_avg);
+        }
+        fclose(fr);
+    } else {
+        fprintf(stderr, "Error: cannot open data/dens_radial_avg.csv for writing\n");
+    }
+
+    /* axial */
+    FILE *fz = fopen("data/dens_axial_avg.csv", "w");
+    if (fz) {
+        fprintf(fz, "height,volume_fraction_avg\n");
+        for (size_t iz = 0; iz < acc_num_bins_z; ++iz) {
+            double z_center = ((iz + 0.5) * (p_parameters->L.z / (double)acc_num_bins_z))/p_parameters->L.z;
+            double phi_avg = acc_phi_z_sum[iz] / (double)acc_sample_count;
+            fprintf(fz, "%g,%g\n", z_center, phi_avg);
+        }
+        fclose(fz);
+    } else {
+        fprintf(stderr, "Error: cannot open data/dens_axial_avg.csv for writing\n");
+    }
+
+    /* cleanup */
+    free(acc_phi_r_sum); acc_phi_r_sum = NULL;
+    free(acc_phi_z_sum); acc_phi_z_sum = NULL;
+    free(acc_vol_bin_r_tot); acc_vol_bin_r_tot = NULL;
+    free(acc_vol_bin_z_tot); acc_vol_bin_z_tot = NULL;
+    acc_sample_count = 0;
+}
+
 void compute_profiles(struct Parameters *p_parameters, struct Vectors *p_vectors)
 {
     size_t num_part = p_parameters->num_part;

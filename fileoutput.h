@@ -1,5 +1,8 @@
 #ifndef FILEOUTPUT_H_
 #define FILEOUTPUT_H_
+void profile_accumulators_init(struct Parameters *p_parameters);
+void profile_accumulators_add_sample(struct Parameters *p_parameters, struct Vectors *p_vectors);
+void profile_accumulators_write_average(struct Parameters *p_parameters);
 
 void compute_profiles(struct Parameters *p_parameters, struct Vectors *p_vectors);
 void compute_profiles_center_based(struct Parameters *p_parameters, struct Vectors *p_vectors);
