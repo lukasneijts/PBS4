@@ -272,6 +272,54 @@ void compute_profiles_center_based(struct Parameters *p_parameters, struct Vecto
     free(vol_bin_geom);
 }
 
+void characterize_final_pile(struct Parameters *parameters, struct Vectors *vectors)
+{
+    double cx = 0.5 * parameters->L.x;
+    double cy = 0.5 * parameters->L.y;
+    double h_max = -INFINITY;
+    double r_max = 0.0;
+    bool reset_file = parameters->reset_final_pile;
+
+    for (int i = 0; i < parameters->num_part; ++i) {
+        struct Vec3D ri = vectors->r[i];
+        double dx = ri.x - cx;
+        double dy = ri.y - cy;
+        double r_xy = sqrt(dx*dx + dy*dy);
+        double top_z = ri.z + parameters->R_max; /* conservative top using R_max */
+
+        if (top_z > h_max) h_max = top_z;
+        if (r_xy > r_max) r_max = r_xy;
+    }
+
+    double R_base = r_max + parameters->R_max; /* include particle radius at edge */
+    double slope_rad = atan2(h_max, R_base);
+    double slope_deg = slope_rad * 180.0 / PI;
+
+    printf("\nFINAL PILE CHARACTERISATION\n");
+    printf("  h_max   = %g (m)\n", h_max);
+    printf("  R_base  = %g (m)\n", R_base);
+    printf("  slope   = %g deg (%g rad)\n\n", slope_deg, slope_rad);
+
+    if (reset_file) {
+        FILE *fp = fopen("data/final_pile_characterisation.csv", "w");
+        if (!fp) {
+            fprintf(stderr, "Error: cannot open data/final_pile_characterisation.csv for writing\n");
+        } 
+        fprintf(fp, "h_max,R_base,slope_deg,slope_rad,num_particles,time_steps,radius\n");
+        fprintf(fp, "%g,%g,%g,%g,%zu,%d,%g\n", h_max, R_base, slope_deg, slope_rad, (size_t)parameters->num_part, parameters->num_dt_steps, parameters->R_cyl);
+
+        fclose(fp);
+    } else {
+        FILE *fp = fopen("data/final_pile_characterisation.csv", "a");
+        if (!fp) {
+            fprintf(stderr, "Error: cannot open data/final_pile_characterisation.csv for appending\n");
+        } 
+        fprintf(fp, "%g,%g,%g,%g,%zu,%d,%g\n", h_max, R_base, slope_deg, slope_rad, (size_t)parameters->num_part, parameters->num_dt_steps, parameters->R_cyl);
+
+        fclose(fp);
+    }
+}
+
 void record_trajectories_xyz(int reset, struct Parameters *p_parameters, struct Vectors *p_vectors)
 /*  Write the particle positions to a xyz file
     The filename (without extension) is given by p_parameters->filename_xyz.

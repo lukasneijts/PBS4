@@ -80,9 +80,8 @@ struct Parameters
     size_t collapse_start_step;      //!< time step at which the cylindrical wall is removed
     size_t cyl_wall_index;           //!< index of the cylindrical wall in the wall arrays
     size_t settle_pers_steps;        //!< number of consecutive steps below kinetic energy tolerance before wall removal
-    double Ekin_tol;                //!< kinetic energy per particle tolerance for settling
-
-    
+    double Ekin_tol;                 //!< kinetic energy per particle tolerance for settling
+    bool reset_final_pile;           //!< filename for saved final pile characterization
 };
 
 /**

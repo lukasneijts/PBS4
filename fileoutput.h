@@ -3,9 +3,13 @@
 void profile_accumulators_init(struct Parameters *p_parameters);
 void profile_accumulators_add_sample(struct Parameters *p_parameters, struct Vectors *p_vectors);
 void profile_accumulators_write_average(struct Parameters *p_parameters);
+void characterize_final_pile(struct Parameters *parameters, struct Vectors *vectors);
+
 
 void compute_profiles(struct Parameters *p_parameters, struct Vectors *p_vectors);
 void compute_profiles_center_based(struct Parameters *p_parameters, struct Vectors *p_vectors);
+
+
 /**
  * @brief Output particle positions to xyz file
  * @param reset 1: write new file or overwrite existing file, 0: append data
